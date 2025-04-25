@@ -93,16 +93,57 @@ body {
   pointer-events: none;
 }
 
-.math-block {
-  overflow-x: auto;
-  margin: 0.5 rem 0;
-  padding: 1 rem;
-  background-color: #ffffff;
-  border-radius: 0.375rem;
-}
-
 .note {
   font-size: 0.9rem;
   color: #6b7280;
   margin-top: -0.5rem;
+}
+
+.math-block {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 0 rem 0;
+}
+
+.math-block mjx-container {
+  min-width: 0 !important;
+  overflow-y: hidden;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+}
+
+.math-block mjx-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.math-block mjx-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.math-block mjx-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.math-block mjx-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Additional styling for better equation display */
+.prose .math-block {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+mjx-container[jax="CHTML"][display="true"] {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+}
+
+.prose {
+  max-width: 100%;
 }

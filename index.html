@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Binary Star Radial Velocity Calculator</title>
+  <link rel="stylesheet" href="./src/styles/main.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      }
+    };
+  </script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            },
+            accent: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-in': 'slideIn 0.4s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideIn: {
+              '0%': { transform: 'translateY(10px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800">
+  <div class="min-h-screen flex flex-col">
+    <header class="bg-gradient-to-r from-primary-600 to-accent-500 text-white py-6 shadow-md">
+      <div class="container mx-auto px-4 relative flex justify-between items-center">
+        <div class="flex-1 text-center">
+          <h1 class="text-2xl md:text-3xl font-bold">Radial Velocity Calculator for Binary Star with
+            \(\dot{\omega}\)</h1>
+        </div>
+        <a href="https://github.com/zhechenghu/rv-omegadot" target="_blank" rel="noopener noreferrer"
+          class="text-white hover:text-gray-200 transition-colors duration-200">
+          <img src="https://github.githubassets.com/favicons/favicon.svg" alt="GitHub" class="h-8 w-8" />
+        </a>
+      </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Input Panel -->
+        <div class="lg:col-span-1">
+          <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="bg-primary-600 text-white px-6 py-4">
+              <h2 class="text-xl font-semibold">Input Parameters</h2>
+            </div>
+            <form id="rvForm" class="p-6">
+              <!-- Method Selection -->
+              <div class="mb-6">
+                <label for="kMethod">Calculate K using:</label>
+                <select id="kMethod" name="kMethod" class="form-select">
+                  <option value="direct">Direct Input</option>
+                  <option value="masses">Masses & Inclination</option>
+                </select>
+              </div>
+
+              <!-- Direct K Input -->
+              <div id="directKInput" class="mb-6">
+                <label for="K_kms">\(K\) (km/s):</label>
+                <input type="number" id="K_kms" name="K_kms" step="any" value="16.792" class="form-input">
+              </div>
+
+              <!-- Mass & Inclination Input -->
+              <div id="massInclinationInput" class="hidden mb-6">
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label for="m1_solar">\(M_1\) (\(M_\odot\)):</label>
+                    <input type="number" id="m1_solar" name="m1_solar" step="any" value="0.033104" class="form-input">
+                  </div>
+                  <div>
+                    <label for="m2_solar">\(M_2\) (\(M_\odot\)):</label>
+                    <input type="number" id="m2_solar" name="m2_solar" step="any" value="0.033219" class="form-input">
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <label for="i_deg">\(i\) (degrees):</label>
+                  <input type="number" id="i_deg" name="i_deg" step="any" value="88.5" class="form-input">
+                </div>
+              </div>
+
+              <!-- Common Parameters -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label for="P_day">\(P\) (days):</label>
+                  <input type="number" id="P_day" name="P_day" step="any" required value="20.907495" class="form-input">
+                </div>
+                <div>
+                  <label for="e">\(e\):</label>
+                  <input type="number" id="e" name="e" step="any" min="0" max="0.999999" required value="0.36035"
+                    class="form-input">
+                </div>
+                <div>
+                  <label for="omega0_deg">\(\omega_0\) (degrees):</label>
+                  <input type="number" id="omega0_deg" name="omega0_deg" step="any" required value="284.33"
+                    class="form-input">
+                </div>
+                <div>
+                  <label for="omega_dot_arcsec_yr">\(\dot{\omega}\) (arcsec/year):</label>
+                  <input type="number" id="omega_dot_arcsec_yr" name="omega_dot_arcsec_yr" step="any" value="-343"
+                    class="form-input">
+                </div>
+                <div>
+                  <label for="T_p_day">\(T_p\) (days):</label>
+                  <input type="number" id="T_p_day" name="T_p_day" step="any" required value="0.0" class="form-input">
+                </div>
+                <div>
+                  <label for="V_gamma_kms">\(V_\gamma\) (km/s):</label>
+                  <input type="number" id="V_gamma_kms" name="V_gamma_kms" step="any" value="0.0" class="form-input">
+                </div>
+              </div>
+
+              <!-- Plot Options -->
+              <div class="mt-8 pt-6 border-t border-gray-200">
+                <h3 class="text-lg font-medium text-gray-800 mb-4">Plot Options</h3>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label for="start_period">Start Period:</label>
+                    <input type="number" id="start_period" name="start_period" step="1" min="0" value="0"
+                      class="form-input">
+                  </div>
+                  <div>
+                    <label for="end_period">End Period:</label>
+                    <input type="number" id="end_period" name="end_period" step="1" min="1" value="5"
+                      class="form-input">
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <label for="points_per_period">Points per Period:</label>
+                  <input type="number" id="points_per_period" name="points_per_period" step="1" min="50" value="1000"
+                    class="form-input">
+                </div>
+                <div class="mt-4 flex items-center">
+                  <input id="showNoApsidal" type="checkbox" class="form-checkbox" checked>
+                  <label for="showNoApsidal" class="ml-2 block text-sm text-gray-700">
+                    Show curve without apsidal motion
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" id="calculateButton"
+                class="w-full mt-6 py-2 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-md shadow transition-colors duration-200 flex items-center justify-center">
+                <span id="calculateButtonText">Calculate & Plot RV Curve</span>
+                <span id="loadingSpinner" class="ml-2 hidden">
+                  <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                  </svg>
+                </span>
+              </button>
+
+              <div id="errorMessage"
+                class="hidden animate-fade-in mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-sm">
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="lg:col-span-2">
+          <div class="bg-white rounded-lg shadow-md overflow-hidden h-full flex flex-col">
+            <div class="bg-primary-600 text-white px-6 py-4 flex justify-between items-center">
+              <h2 class="text-xl font-semibold">Radial Velocity Curve</h2>
+              <div id="resultsBadge" class="hidden px-3 py-1 bg-green-500 text-white text-xs font-medium rounded-full">
+                Calculated
+              </div>
+            </div>
+
+            <div class="flex-grow p-6 pt-4 relative">
+              <div id="rvPlot" class="w-full h-full min-h-[450px]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Explanation Section -->
+      <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">Understanding Apsidal Precession in Binary Star Radial
+          Velocities</h1>
+        <div class="prose max-w-none">
+          <p>
+            Apsidal precession, the gradual rotation of the orbit's ellipse within its plane, can occur in binary
+            systems for various reasons. For instance, the gravitational pull from a third orbiting body, general
+            relativistic effects, or tidal forces between stars can cause the argument of pericenter ($\omega$) to
+            change over time. This precession leaves a distinct signature in the observed radial velocity (RV) of the
+            stars.
+          </p>
+
+          <p>
+            This webpage provides a simple demonstration of how apsidal precession affects radial velocity
+            measurements.
+            We will derive the equation describing the RV curve when the argument of pericenter advances at a constant
+            rate ($\dot{\omega}$), and examine a common approximation used in modeling.
+          </p>
+
+          <h3 class="text-xl font-semibold mt-6 mb-3">Deriving the Radial Velocity with Constant Apsidal Precession</h3>
+
+          <p>
+            To find the radial velocity for a binary experiencing constant apsidal precession, we start with the time
+            derivative of the line-of-sight position ($Z$) component of the star's Keplerian motion, adding the
+            systemic
+            velocity ($\gamma$). Following Equation 55 in Murray & Correia (2010, <a
+              href="https://arxiv.org/abs/1009.1738" target="_blank" rel="noopener noreferrer">arXiv:1009.1738</a>):
+          </p>
+
+          <div class="math-block">
+            $$
+            V_{r} = \frac{\mathrm{d} Z}{\mathrm{d}t} + \gamma = \frac{\mathrm{d}}{\mathrm{d}t} [ r \sin (\omega
+            +f)\sin
+            i ] + \gamma
+            $$
+          </div>
+
+          <p>
+            Here, $V_{r}$ is the instantaneous radial velocity, $r$ is the distance of the star from the system's
+            barycenter, $f$ is the true anomaly, $\omega$ is the argument of pericenter, $i$ is the orbital
+            inclination
+            (angle between the angular momentum of the binary and the line of sight), and $\gamma$ is the systemic
+            velocity (the velocity of the binary system's center of mass).
+          </p>
+
+          <p>
+            Now, we account for apsidal precession by letting the argument of pericenter change linearly with time:
+            $\omega(t) = \omega_{0} + \dot{\omega} t$, where $\omega_{0}$ is the argument of pericenter at $t=0$ and
+            $\dot{\omega}$ is the constant rate of precession. Substituting this into the equation and performing the
+            differentiation:
+          </p>
+
+          <div class="math-block">
+            $$
+            \begin{align}
+            V_{r} &= \frac{\mathrm{d}}{\mathrm{d}t} [ r \sin (\omega_{0} + \dot{\omega} t +f)\sin i ] + \gamma \\
+            &= \sin i \left[ \frac{\mathrm{d}r}{\mathrm{d}t} \sin(\omega_{0}+\dot{\omega} t + f) + r
+            \frac{\mathrm{d}(\omega_0 + \dot{\omega} t + f)}{\mathrm{d}t} \cos(\omega_{0}+\dot{\omega} t+ f) \right] +
+            \gamma \\
+            &= \sin i [ \dot{r} \sin(\omega_{0}+\dot{\omega} t + f) + r (\dot{\omega} + \dot{f})
+            \cos(\omega_{0}+\dot{\omega} t+ f) ] + \gamma \\
+            &= \sin i [ r \dot{f} \cos(\omega_0 + \dot{\omega} t + f) + \dot{r} \sin(\omega_0 + \dot{\omega} t + f) ]
+            +
+            r \dot{\omega} \sin i \cos(\omega_0 + \dot{\omega} t + f) + \gamma
+            \end{align}
+            $$
+          </div>
+          <p class="note"><em>(Note the rearrangement in the last step to group terms similar to the standard
+              Keplerian
+              RV derivation, plus the new term involving $\dot{\omega}$)</em>.</p>
+
+          <p>
+            We use the standard expressions for $\dot{r}$ and $r\dot{f}$ (Eqs. 31 and 32 in Murray & Correia 2010):
+          </p>
+          <div class="math-block">
+            $$
+            \begin{align}
+            \dot{r} &= \frac{na}{\sqrt{1-e^2}} e \sin f \\
+            r\dot{f} &= \frac{na}{\sqrt{1-e^2}} (1 + e \cos f)
+            \end{align}
+            $$
+          </div>
+          <p>
+            where $n = 2\pi/P$ is the mean motion, $P$ is the orbital period, $a$ is the semi-major axis, and $e$ is
+            the
+            eccentricity. Substituting these into the $V_r$ expression yields:
+          </p>
+
+          <div class="math-block">
+            $$
+            \begin{align}
+            V_{r} &= \sin i \left[ \frac{na(1+e \cos f)}{\sqrt{1-e^2}} \cos(\omega_0+\dot{\omega}t+f) + \frac{nae \sin
+            f}{\sqrt{1-e^2}} \sin(\omega_0+\dot{\omega}t+f) \right] \\
+            & \qquad + r \dot{\omega} \sin i \cos(\omega_0 + \dot{\omega} t + f) + \gamma \\
+            &= \frac{na \sin i}{\sqrt{1-e^2}} [ (1+e \cos f)\cos(\omega_0+\dot{\omega}t+f) + e \sin f
+            \sin(\omega_0+\dot{\omega}t+f) ] \\
+            & \qquad + r \dot{\omega} \sin i \cos(\omega_0 + \dot{\omega} t + f) + \gamma
+            \end{align}
+            $$
+          </div>
+          <p>
+            Using the trigonometric identity $\cos(A-B) = \cos A \cos B + \sin A \sin B$ on the terms inside the
+            square
+            brackets (with $A = \omega_0+\dot{\omega}t+f$ and $B=f$), and recalling the relation $r = a(1-e^2)/(1+e
+            \cos
+            f)$:
+          </p>
+          <div class="math-block">
+            $$
+            \begin{align}
+            V_{r} &= \frac{na \sin i}{\sqrt{1-e^2}} [\cos(\omega_{0}+\dot{\omega}t+f)+e
+            \cos(\omega_{0}+\dot{\omega}t)]
+            \\
+            & \qquad + \frac{a(1-e^2)}{1+e \cos f} \dot{\omega} \sin i \cos(\omega_{0} + \dot{\omega} t + f) + \gamma
+            \\
+            &= K [\cos(\omega_{0}+\dot{\omega}t+f)+e \cos(\omega_{0}+\dot{\omega}t)] \\
+            & \qquad + K \frac{P (1-e^{2})^{3 /2}}{2\pi (1 + e \cos f )} \dot{\omega} \cos(\omega_0 + \dot{\omega} t +
+            f) + \gamma
+            \end{align}
+            $$
+          </div>
+          <p>
+            where $K = \frac{na \sin i}{\sqrt{1-e^2}} = \frac{2 \pi a \sin i}{P \sqrt{ 1- e^{2} }}$ is the radial
+            velocity semi-amplitude. This is the full equation for the radial velocity under constant apsidal
+            precession. This full equation is used to generate the plot.
+          </p>
+
+          <h3 class="text-xl font-semibold mt-6 mb-3">A Common Approximation</h3>
+
+          <p>
+            You might notice that the first main term, $K [\cos(\omega_{0}+\dot{\omega}t+f)+e
+            \cos(\omega_{0}+\dot{\omega}t)]$, looks exactly like the standard Keplerian radial velocity equation, just
+            with $\omega$ replaced by $\omega(t) = \omega_{0} + \dot{\omega} t$
+          </p>
+          <div class="math-block">
+            $$
+            V_{r, \text{Keplerian}} = K [\cos(\omega + f) + e \cos \omega] + \gamma
+            $$
+          </div>
+          <p>
+            Using this form, simply substituting $\omega(t)$ for $\omega$, is a common approximation:
+          </p>
+          <div class="math-block">
+            $$
+            V_{r, \text{approx}} = K [\cos(\omega_{0}+\dot{\omega}t + f) + e \cos (\omega_{0} + \dot{\omega} t)] +
+            \gamma
+            $$
+          </div>
+          <p>
+            How good is this approximation? It essentially neglects the final term from our full derivation:
+          </p>
+          <div class="math-block">
+            $$
+            \text{Neglected Term} = K \frac{P (1-e^{2})^{3 /2}}{2\pi (1 + e \cos f )} \dot{\omega} \cos(\omega_0 +
+            \dot{\omega} t + f)
+            $$
+          </div>
+          <p>
+            Let's analyze the behavior using a first-order Taylor expansion in the small quantity $\dot{\omega} t$
+            (assuming the total precession over the time $t$ is not excessively large). Let $\omega(t) = \omega_0 +
+            \delta \omega$, where $\delta \omega = \dot{\omega}t$.
+          </p>
+
+          <p>
+            Expanding the terms in the <em>approximate</em> equation:
+          </p>
+          <div class="math-block">
+            $$
+            \begin{align}
+            \cos(\omega_{0}+\dot{\omega}t + f) &\approx \cos(\omega_0 + f) - (\dot{\omega}t) \sin(\omega_0 + f) +
+            O((\dot{\omega}t)^2) \\
+            e \cos(\omega_{0}+\dot{\omega} t) &\approx e \cos(\omega_0) - e(\dot{\omega}t) \sin(\omega_0) +
+            O((\dot{\omega}t)^2)
+            \end{align}
+            $$
+          </div>
+          <p>
+            So the approximate RV contains terms that behave like $\dot{\omega}t \times (\text{sinusoid})$.
+          </p>
+
+          <p>
+            Now let's look at the leading order behavior of the <em>neglected</em> term. It's already proportional to
+            $\dot{\omega}$:
+          </p>
+          <div class="math-block">
+            $$
+            \text{Neglected Term} \approx K \frac{P (1-e^{2})^{3 /2}}{2\pi (1 + e \cos f )} \dot{\omega} \cos(\omega_0
+            +
+            f) + O(\dot{\omega}^2)
+            $$
+          </div>
+          <p>
+            Notice that the first-order correction terms derived from the approximation (highlighted in red below)
+            grow
+            linearly with time $t$:
+          </p>
+          <div class="math-block">
+            $$ V_{r, \text{approx}} \approx K[\cos(\omega_0+f) + e \cos \omega_0] + \gamma \quad \textcolor{red}{-
+            K(\dot{\omega}t)[\sin(\omega_0+f) + e\sin \omega_0]} $$
+          </div>
+          <p>
+            The neglected term, however, contributes a first-order correction in $\dot{\omega}$ whose amplitude
+            <em>does
+              not</em> grow with time:
+          </p>
+          <div class="math-block">
+            $$ \text{Neglected Term} \approx \textcolor{blue}{K \frac{P (1-e^{2})^{3 /2}}{2\pi (1 + e \cos f )}
+            \dot{\omega} \cos(\omega_0 + f)} $$
+          </div>
+
+          <p>
+            <strong>What does this mean?</strong> Over a long observational baseline (large $t$), the deviation of the
+            true precessing RV from a simple Keplerian model (with fixed $\omega_0$) is dominated by the terms
+            proportional to $\dot{\omega}t$ which arise from simply letting $\omega$ vary within the standard formula.
+            The additional term we derived (Neglected Term) is also a first-order effect of $\dot{\omega}$, but its
+            amplitude doesn't increase over time.
+          </p>
+
+          <p>
+            Therefore, for many practical purposes, especially when analyzing datasets spanning long durations where
+            the
+            precession effect becomes more apparent, the approximation:
+          </p>
+          <div class="math-block">
+            $$
+            V_r \approx K [\cos(\omega_{0}+\dot{\omega}t + f) + e \cos (\omega_{0} + \dot{\omega} t)] + \gamma
+            $$
+          </div>
+          <p>
+            captures the dominant time-varying signature of apsidal precession reasonably well, although it is not the
+            exact expression. The script accompanying this post uses the full equation.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-4 mt-8">
+      <div class="container mx-auto px-4 text-center text-sm">
+        <p>© 2025 Binary Star Radial Velocity Calculator | Astronomy Tools</p>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="./src/js/main.js"></script>
+</body>
+
+</html>

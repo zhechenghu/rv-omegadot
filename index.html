@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Binary Star Radial Velocity Calculator</title>
+  <title>Binary Star System Calculator</title>
   <link rel="stylesheet" href="./src/styles/main.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +13,10 @@
   <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <!-- Add Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script>
     window.MathJax = {
       tex: {
@@ -85,15 +89,14 @@
 
 <body class="bg-gray-50 font-sans text-gray-800">
   <div class="min-h-screen flex flex-col">
-    <header class="bg-gradient-to-r from-primary-600 to-accent-500 text-white py-6 shadow-md">
+    <header class="bg-white text-gray-800 py-4 shadow-sm border-b border-gray-200">
       <div class="container mx-auto px-4 relative flex justify-between items-center">
-        <div class="flex-1 text-center">
-          <h1 class="text-2xl md:text-3xl font-bold">Radial Velocity Calculator for Binary Star with
-            \(\dot{\omega}\)</h1>
+        <div class="flex-1">
+          <h1 class="text-xl md:text-2xl font-semibold">Binary Star System Calculator</h1>
         </div>
         <a href="https://github.com/zhechenghu/rv-omegadot" target="_blank" rel="noopener noreferrer"
-          class="text-white hover:text-gray-200 transition-colors duration-200">
-          <img src="https://github.githubassets.com/favicons/favicon.svg" alt="GitHub" class="h-8 w-8" />
+          class="text-gray-700 hover:text-gray-900 transition-colors duration-200">
+          <i class="fab fa-github text-3xl"></i>
         </a>
       </div>
     </header>
@@ -102,15 +105,17 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Input Panel -->
         <div class="lg:col-span-1">
-          <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="bg-primary-600 text-white px-6 py-4">
-              <h2 class="text-xl font-semibold">Input Parameters</h2>
+          <div class="bg-white rounded-md shadow-sm border border-accent-200 overflow-hidden">
+            <div class="bg-accent-100/70 border-b border-accent-200 px-6 py-3 flex items-center">
+              <i class="fas fa-sliders-h text-accent-600 mr-2"></i>
+              <h2 class="text-lg font-medium text-gray-700">Input Parameters</h2>
             </div>
             <form id="rvForm" class="p-6">
               <!-- Method Selection -->
               <div class="mb-6">
                 <label for="kMethod">Calculate K using:</label>
-                <select id="kMethod" name="kMethod" class="form-select">
+                <select id="kMethod" name="kMethod"
+                  class="form-select w-full border border-gray-300 rounded-md px-3 py-2">
                   <option value="direct">Direct Input</option>
                   <option value="masses">Masses & Inclination</option>
                 </select>
@@ -119,7 +124,8 @@
               <!-- Direct K Input -->
               <div id="directKInput" class="mb-6">
                 <label for="K_kms">\(K\) (km/s):</label>
-                <input type="number" id="K_kms" name="K_kms" step="any" value="16.792" class="form-input">
+                <input type="number" id="K_kms" name="K_kms" step="any" value="16.792"
+                  class="form-input w-full border border-gray-300 rounded-md px-3 py-2">
               </div>
 
               <!-- Mass & Inclination Input -->
@@ -127,16 +133,19 @@
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label for="m1_solar">\(M_1\) (\(M_\odot\)):</label>
-                    <input type="number" id="m1_solar" name="m1_solar" step="any" value="0.033104" class="form-input">
+                    <input type="number" id="m1_solar" name="m1_solar" step="any" value="0.033104"
+                      class="form-input w-full border border-gray-300 rounded-md px-3 py-2">
                   </div>
                   <div>
                     <label for="m2_solar">\(M_2\) (\(M_\odot\)):</label>
-                    <input type="number" id="m2_solar" name="m2_solar" step="any" value="0.033219" class="form-input">
+                    <input type="number" id="m2_solar" name="m2_solar" step="any" value="0.033219"
+                      class="form-input w-full border border-gray-300 rounded-md px-3 py-2">
                   </div>
                 </div>
                 <div class="mt-4">
                   <label for="i_deg">\(i\) (degrees):</label>
-                  <input type="number" id="i_deg" name="i_deg" step="any" value="88.5" class="form-input">
+                  <input type="number" id="i_deg" name="i_deg" step="any" value="88.5"
+                    class="form-input w-full border border-gray-300 rounded-md px-3 py-2">
                 </div>
               </div>
 
@@ -144,30 +153,33 @@
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label for="P_day">\(P\) (days):</label>
-                  <input type="number" id="P_day" name="P_day" step="any" required value="20.907495" class="form-input">
+                  <input type="number" id="P_day" name="P_day" step="any" required value="20.907495"
+                    class="form-input w-full border border-gray-300 rounded-md px-3 py-2">
                 </div>
                 <div>
                   <label for="e">\(e\):</label>
                   <input type="number" id="e" name="e" step="any" min="0" max="0.999999" required value="0.36035"
-                    class="form-input">
+                    class="form-input w-full border border-gray-300 rounded-md px-3 py-2">
                 </div>
                 <div>
                   <label for="omega0_deg">\(\omega_0\) (degrees):</label>
                   <input type="number" id="omega0_deg" name="omega0_deg" step="any" required value="284.33"
-                    class="form-input">
+                    class="form-input w-full border border-gray-300 rounded-md px-3 py-2">
                 </div>
                 <div>
                   <label for="omega_dot_arcsec_yr">\(\dot{\omega}\) (arcsec/year):</label>
                   <input type="number" id="omega_dot_arcsec_yr" name="omega_dot_arcsec_yr" step="any" value="-343"
-                    class="form-input">
+                    class="form-input w-full border border-gray-300 rounded-md px-3 py-2">
                 </div>
                 <div>
                   <label for="T_p_day">\(T_p\) (days):</label>
-                  <input type="number" id="T_p_day" name="T_p_day" step="any" required value="0.0" class="form-input">
+                  <input type="number" id="T_p_day" name="T_p_day" step="any" required value="0.0"
+                    class="form-input w-full border border-gray-300 rounded-md px-3 py-2">
                 </div>
                 <div>
                   <label for="V_gamma_kms">\(V_\gamma\) (km/s):</label>
-                  <input type="number" id="V_gamma_kms" name="V_gamma_kms" step="any" value="0.0" class="form-input">
+                  <input type="number" id="V_gamma_kms" name="V_gamma_kms" step="any" value="0.0"
+                    class="form-input w-full border border-gray-300 rounded-md px-3 py-2">
                 </div>
               </div>
 
@@ -178,21 +190,22 @@
                   <div>
                     <label for="start_period">Start Period:</label>
                     <input type="number" id="start_period" name="start_period" step="1" min="0" value="0"
-                      class="form-input">
+                      class="form-input w-full border border-gray-300 rounded-md px-3 py-2">
                   </div>
                   <div>
                     <label for="end_period">End Period:</label>
                     <input type="number" id="end_period" name="end_period" step="1" min="1" value="5"
-                      class="form-input">
+                      class="form-input w-full border border-gray-300 rounded-md px-3 py-2">
                   </div>
                 </div>
                 <div class="mt-4">
                   <label for="points_per_period">Points per Period:</label>
                   <input type="number" id="points_per_period" name="points_per_period" step="1" min="50" value="1000"
-                    class="form-input">
+                    class="form-input w-full border border-gray-300 rounded-md px-3 py-2">
                 </div>
                 <div class="mt-4 flex items-center">
-                  <input id="showNoApsidal" type="checkbox" class="form-checkbox" checked>
+                  <input id="showNoApsidal" type="checkbox"
+                    class="form-checkbox text-primary-500 border border-gray-300 rounded" checked>
                   <label for="showNoApsidal" class="ml-2 block text-sm text-gray-700">
                     Show curve without apsidal motion
                   </label>
@@ -200,16 +213,10 @@
               </div>
 
               <button type="submit" id="calculateButton"
-                class="w-full mt-6 py-2 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-md shadow transition-colors duration-200 flex items-center justify-center">
+                class="w-full mt-6 py-2 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-md shadow-sm transition-colors duration-200 flex items-center justify-center">
                 <span id="calculateButtonText">Calculate & Plot RV Curve</span>
                 <span id="loadingSpinner" class="ml-2 hidden">
-                  <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                    </path>
-                  </svg>
+                  <i class="fas fa-spinner fa-spin"></i>
                 </span>
               </button>
 
@@ -222,9 +229,12 @@
 
         <!-- Results Panel -->
         <div class="lg:col-span-2">
-          <div class="bg-white rounded-lg shadow-md overflow-hidden h-full flex flex-col">
-            <div class="bg-primary-600 text-white px-6 py-4 flex justify-between items-center">
-              <h2 class="text-xl font-semibold">Radial Velocity Curve</h2>
+          <div class="bg-white rounded-md shadow-sm border border-accent-200 overflow-hidden h-full flex flex-col">
+            <div class="bg-accent-100/70 border-b border-accent-200 px-6 py-3 flex justify-between items-center">
+              <div class="flex items-center">
+                <i class="fas fa-chart-line text-accent-600 mr-2"></i>
+                <h2 class="text-lg font-medium text-gray-700">Radial Velocity Curve</h2>
+              </div>
               <div id="resultsBadge" class="hidden px-3 py-1 bg-green-500 text-white text-xs font-medium rounded-full">
                 Calculated
               </div>
@@ -236,11 +246,15 @@
           </div>
         </div>
       </div>
-
       <!-- Explanation Section -->
-      <div class="mt-8 bg-white rounded-lg shadow-md p-6">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4">Understanding Apsidal Precession in Binary Star Radial
-          Velocities</h1>
+      <div class="mt-8 bg-white rounded-md shadow-sm border border-gray p-6">
+        <div class="bg-gray-100/70 -mx-6 -mt-6 mb-6 px-6 py-3 border-b border-gray">
+          <div class="flex items-center">
+            <i class="fas fa-info-circle text-gray mr-2"></i>
+            <h2 class="text-lg font-medium text-gray-700">Understanding Apsidal Precession in Binary Star Radial
+              Velocities</h2>
+          </div>
+        </div>
         <div class="prose max-w-none">
           <p>
             Apsidal precession, the gradual rotation of the orbit's ellipse within its plane, can occur in binary
